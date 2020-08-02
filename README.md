@@ -27,5 +27,5 @@ python3 main.py README.md Table\ Contents
 All contributions are welcomed.
 
 <h1>License</h1>
-This project is licensed under  GNU GENERAL PUBLIC LICENSE - see the [LICENSE.txt](LICENSE.txt) file for details.
+This project is licensed under  GNU GENERAL PUBLIC LICENSE - see the <a href='https://github.com/djeada/Md-table-of-contents-generator/blob/master/LICENSE.txtLICENSE.txt]'> LICENSE.txt </a> file for details.
 
