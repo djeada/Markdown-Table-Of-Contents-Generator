@@ -19,7 +19,8 @@ Run from the terminal. </br>
 First argument: file path (Default value: README.md)</br>
 Second argument: name of the table of contents (Default value: Table of Contents)</br></br>
 Example on Linux Bash:
-```bash
+
+```sh
 python3 main.py README.md Table\ Contents
 ```
 
