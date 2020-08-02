@@ -21,7 +21,7 @@ Second argument: name of the table of contents (Default value: Table of Contents
 Example on Linux Bash:
 
 ```sh
-python3 main.py README.md Table\ Contents
+python3 main.py README.md Table\ of\ Contents
 ```
 
 <h1>Contributing </h1>
