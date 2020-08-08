@@ -48,7 +48,7 @@ def generateTableOfContensts(fileName, tableOfContentsName):
 		data = data[:index] + line + data[index:]	
 		index += len(line)
 		
-	with open('README.md', 'w') as myFile:
+	with open(fileName, 'w') as myFile:
 		myFile.write(data)
 			
 if __name__ == '__main__':
