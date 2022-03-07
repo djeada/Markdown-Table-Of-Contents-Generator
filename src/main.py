@@ -35,7 +35,7 @@ def parse_args():
     if args.output:
         config.output_file_name = args.output
     if args.depth:
-        config.depth = args.depth
+        config.depth = int(args.depth)
     if args.table_of_contents:
         config.table_of_contents_name = args.table_of_contents
 
