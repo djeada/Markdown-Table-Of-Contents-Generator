@@ -7,6 +7,7 @@ import argparse
 class Config:
     file_name: str = 'README.md'
     table_of_contents_name: str = 'Table of Contents'
+    depth: int = 2
 
 
 @dataclass
@@ -76,15 +77,15 @@ def find_headers_markdown(file_contents: str, depth: int = 1) -> List[str]:
     return headers
 
 
-def generate_table_of_contents(file_contents: str, table_of_contents_name: str) -> str:
+def generate_table_of_contents(file_contents: str, table_of_contents_name: str, depth: int) -> str:
     '''
     Generate table of contents for file.
     '''
     if is_using_html_tags(file_contents):
-        headers = find_headers_html(file_contents)
+        headers = find_headers_html(file_contents, depth)
 
     elif is_using_markdown_syntax(file_contents):
-        headers = find_headers_markdown(file_contents)
+        headers = find_headers_markdown(file_contents, depth)
 
     headers = [f'- [{header.replace("-", " ")}](#{header})' for header in headers]
 
@@ -139,7 +140,7 @@ def main():
     if is_table_of_contents_present(file_contents):
         file_contents = remove_table_of_contents(file_contents)
 
-    table_of_contents = generate_table_of_contents(file_contents, config.table_of_contents_name)
+    table_of_contents = generate_table_of_contents(file_contents, config.table_of_contents_name, config.depth)
     # put it on top of the file
     file_contents = table_of_contents + '\n\n' + file_contents.lstrip()
     open(config.file_name, 'w',  encoding="utf-8").write(file_contents)
