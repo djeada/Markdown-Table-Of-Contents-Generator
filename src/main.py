@@ -1,63 +1,115 @@
-#!/usr/bin/python
-import sys
-import os
+from dataclasses import dataclass
+from typing import List
+import argparse
 
-tagsForHeader = ('<h1>', '</h1>')
+@dataclass
+class Config:
+    file_name: str = 'README.md'
+    table_of_contents_name: str = 'Table of Contents'
 
-def findAllOccurences(string, subString):
-    start = 0
-    indexes = []
-    while 1:
-        start = string.find(subString, start)
-        if start == -1: 
-        	return indexes
-        indexes.append(start + len(subString))
-        start += len(subString)
+def parse_args():
 
-def generateTableOfContensts(fileName, tableOfContentsName):
-	with open(fileName) as myFile:
-		data = myFile.read()
+    parser = argparse.ArgumentParser(description='Generate table of contents for README.md file.')
+    parser.add_argument('-f', '--file', help='file name', required=False)
+    parser.add_argument('-t', '--table-of-contents', help='table of contents name', required=False)
+    
+    args = parser.parse_args()
+    config = Config()
+    if args.file:
+        config.file_name = args.file
+    if args.table_of_contents:
+        config.table_of_contents_name = args.table_of_contents
 
-	index = data.find(tagsForHeader[0]) if data.find(tagsForHeader[0]) >= 0 else 0
+    return config
 
-	if data.find('<!--ts-->') >= 0:
-		data = data[:data.find('<!--ts-->') + len('<!--ts-->')] + data[data.find('<!--te-->'):]
+def is_using_html_tags(file_contents: str) -> bool:
+    '''
+    Check if file is using html tags for declaration of headers.
+    '''
+    html_tags = (f'<h{i}>' for i in range(1, 6))
+    return any(tag in file_contents for tag in html_tags)
 
-	else:
-		contestTableStructure = tableOfContentsName + '\n=================\n\n<!--ts-->\n\n<!--te-->\n\n'
-		
-		data = data[:index] + contestTableStructure + data[index:]
+def is_using_markdown_syntax(file_contents: str) -> bool:
+    '''
+    Check if file is using markdown syntax for headers.
+    '''
+    return '#' in file_contents
 
-	index = data.find('<!--ts-->') + len('<!--ts-->')
-	
-	headers = []
-	
-	for i in findAllOccurences(data, tagsForHeader[0]):
-	
-		header = ''
-		j = 0
-		while data[i + j: i + j + len(tagsForHeader[1])] != tagsForHeader[1] and i + j < len(data):
-			header += data[i+j]
-			j += 1
-		
-		header.replace(',', '|')
-		headers.append(header)
+def find_headers_html(file_contents: str, depth: int = 1) -> List[str]:
+    '''
+    Find headers in file.
+    '''
+    if depth < 1 or depth > 6:
+        raise ValueError('Depth must be between 1 and 6')
 
-	for header in headers:
-		line = '\n   * [' + header + '](#' + header.replace(' ', '-') + ')' 
-		data = data[:index] + line + data[index:]	
-		index += len(line)
-		
-	with open(fileName, 'w') as myFile:
-		myFile.write(data)
-			
+    headers = []
+    for i in range(file_contents.find(f'<h{depth}>'), len(file_contents)):
+        if file_contents[i:i+5] == f'</h{depth}>':
+            headers.append(file_contents[file_contents.find(f'<h{depth}>')+4:i])
+    
+    return headers
+
+def find_headers_markdown(file_contents: str, depth: int = 1) -> List[str]:
+    '''
+    Find headers in file.
+    '''
+    if depth < 1 or depth > 6:
+        raise ValueError('Depth must be between 1 and 6')
+
+    headers = []
+    # get the whole line after the header #
+    # add it to the list of headers
+    for i in range(file_contents.find('#'*depth), len(file_contents)):
+        if file_contents[i] == '\n':
+            headers.append(file_contents[file_contents.find('#'*depth)+depth:i])
+
+    return headers 
+
+def generate_table_of_contents(file_contents: str, table_of_contents_name: str) -> str:
+    '''
+    Generate table of contents for file.
+    '''
+    if is_using_html_tags(file_contents):
+        headers = find_headers_html(file_contents)
+
+    elif is_using_markdown_syntax(file_contents):
+        headers = find_headers_markdown(file_contents)
+
+    headers = [f'- [{header.replace("-"," ")}](#{header})' for header in headers]
+
+    table_of_contents: List[str] = [f'## {table_of_contents_name}', '<!--ts-->\n'] + headers + ['\n<!--te-->']
+  
+    return '\n'.join(table_of_contents)
+
+def is_table_of_contents_present(file_contents: str) -> bool:
+    '''
+    Check if table of contents is present in file.
+    '''
+    return '<!--ts-->' in file_contents and '<!--te-->' in file_contents
+
+def remove_table_of_contents(file_contents: str) -> str:
+    '''
+    Remove table of contents from file.
+    '''
+    # find in which line <!--ts--> appears
+    start_line = file_contents.find('<!--ts-->')
+    # remove two lines above <!--ts-->
+    file_contents = file_contents[:start_line-2] + file_contents[start_line:]
+    # remove everything between <!--ts--> and <!--te-->
+    file_contents = file_contents.replace(file_contents[file_contents.find('<!--ts-->'):file_contents.find('<!--te-->')+8], '')
+    return file_contents
+
+def main():
+    config = parse_args()
+    file_contents = open(config.file_name, 'r').read()
+
+    if is_table_of_contents_present(file_contents):
+        file_contents = remove_table_of_contents(file_contents)
+
+    table_of_contents = generate_table_of_contents(file_contents, config.table_of_contents_name)
+    # put it on top of the file
+    file_contents = table_of_contents + '\n' + file_contents
+    open(config.file_name, 'w').write(file_contents)
+    
 if __name__ == '__main__':
-	
-	fileName = str(sys.argv[1]) if len(sys.argv) > 1 else 'README.md'
-	tableOfContentsName = str(sys.argv[2]) if len(sys.argv) > 2 else 'Table of Contents'
-	
-	if (os.path.isfile(fileName)):
-		generateTableOfContensts(fileName, tableOfContentsName)
-	
-	else:
-		print('File ' + fileName + ' does not exist!')
+    main()
