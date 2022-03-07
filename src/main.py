@@ -9,6 +9,11 @@ class Config:
     table_of_contents_name: str = 'Table of Contents'
 
 
+@dataclass
+class Tags:
+    TABLE_CONTENTS_START: str = '<!--ts-->'
+    TABLE_CONTENTS_END: str = '<!--te-->'
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate table of contents for README.md file.')
     parser.add_argument('-f', '--file', help='file name', required=False)
@@ -84,7 +89,7 @@ def generate_table_of_contents(file_contents: str, table_of_contents_name: str) 
 
     headers = [f'- [{header.replace("-", " ")}](#{header})' for header in headers]
 
-    table_of_contents: List[str] = [f'## {table_of_contents_name}', '<!--ts-->\n'] + headers + ['\n<!--te-->']
+    table_of_contents: List[str] = [f'## {table_of_contents_name}', f'{Tags.TABLE_CONTENTS_START}\n'] + headers + [f'\n{Tags.TABLE_CONTENTS_END}']
 
     return '\n'.join(table_of_contents)
 
@@ -93,20 +98,38 @@ def is_table_of_contents_present(file_contents: str) -> bool:
     '''
     Check if table of contents is present in file.
     '''
-    return '<!--ts-->' in file_contents and '<!--te-->' in file_contents
+    return Tags.TABLE_CONTENTS_START in file_contents and Tags.TABLE_CONTENTS_END in file_contents
 
 
 def remove_table_of_contents(file_contents: str) -> str:
     '''
     Remove table of contents from file.
     '''
-    # find in which line <!--ts--> appears
-    start_line = file_contents.find('<!--ts-->')
-    # remove two lines above <!--ts-->
-    file_contents = file_contents[:start_line - 2] + file_contents[start_line:]
-    # remove everything between <!--ts--> and <!--te-->
+    #convert file_contents from str to list of strings 
+    tmp = file_contents.split('\n')
+    #find the index of the first line with Tags.TABLE_CONTENTS_START
+    start = tmp.index(Tags.TABLE_CONTENTS_START)
+
+    if start == -1:
+        raise ValueError('Tags.TABLE_CONTENTS_START not found')
+
+    print(start)
+    #remove the line above the first line with Tags.TABLE_CONTENTS_START
+    tmp = tmp[:start-1] + tmp[start:]
+    #convert the list back to a string
+    file_contents = '\n'.join(tmp)
+
+    # remove everything between Tags.TABLE_CONTENTS_START and Tags.TABLE_CONTENTS_END
+    start = file_contents.find(Tags.TABLE_CONTENTS_START)
+    stop = file_contents.find(Tags.TABLE_CONTENTS_END) + len(Tags.TABLE_CONTENTS_END)
+
     file_contents = file_contents.replace(
-        file_contents[file_contents.find('<!--ts-->'):file_contents.find('<!--te-->') + 8], '')
+        file_contents[start:stop], '')
+
+    # check if there are empty lines after start
+    while file_contents[start] == '\n':
+        file_contents = file_contents[:start] + file_contents[start+1:]
+
     return file_contents
 
 
@@ -119,7 +142,7 @@ def main():
 
     table_of_contents = generate_table_of_contents(file_contents, config.table_of_contents_name)
     # put it on top of the file
-    file_contents = table_of_contents + '\n\n' + file_contents
+    file_contents = table_of_contents + '\n\n' + file_contents.lstrip()
     open(config.file_name, 'w').write(file_contents)
 
 
