@@ -6,6 +6,7 @@ import argparse
 @dataclass
 class Config:
     file_name: str = 'README.md'
+    output_file_name: str = 'README.md'
     table_of_contents_name: str = 'Table of Contents'
     depth: int = 2
 
@@ -17,7 +18,8 @@ class Tags:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate table of contents for README.md file.')
-    parser.add_argument('-f', '--file', help='file name', required=False)
+    parser.add_argument('-i', '--input', help='input file name', required=False)
+    parser.add_argument('-o', '--output', help='output file name', required=False)
     parser.add_argument('-t', '--table-of-contents', help='table of contents name', required=False)
 
     args = parser.parse_args()
@@ -143,7 +145,7 @@ def main():
     table_of_contents = generate_table_of_contents(file_contents, config.table_of_contents_name, config.depth)
     # put it on top of the file
     file_contents = table_of_contents + '\n\n' + file_contents.lstrip()
-    open(config.file_name, 'w',  encoding="utf-8").write(file_contents)
+    open(config.output_file_name, 'w',  encoding="utf-8").write(file_contents)
 
 
 if __name__ == '__main__':
