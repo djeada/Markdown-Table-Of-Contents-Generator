@@ -20,12 +20,17 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Generate table of contents for README.md file.')
     parser.add_argument('-i', '--input', help='input file name', required=False)
     parser.add_argument('-o', '--output', help='output file name', required=False)
+    parser.add_argument('-d', '--depth', help='depth of headers', required=False)
     parser.add_argument('-t', '--table-of-contents', help='table of contents name', required=False)
 
     args = parser.parse_args()
     config = Config()
-    if args.file:
+    if args.input:
         config.file_name = args.file
+    if args.output:
+        config.output_file_name = args.output
+    if args.depth:
+        config.depth = args.depth
     if args.table_of_contents:
         config.table_of_contents_name = args.table_of_contents
 
@@ -59,6 +64,8 @@ def find_headers_html(file_contents: str, depth: int = 1) -> List[str]:
     headers = [header.replace(f'<h{depth}>', '').replace(f'</h{depth}>', '') for header in headers]
     # strip whitespaces
     headers = [header.strip() for header in headers]
+    # replace spaces with -
+    headers = [header.replace(' ', '-') for header in headers]
 
     return headers
 
@@ -75,6 +82,8 @@ def find_headers_markdown(file_contents: str, depth: int = 1) -> List[str]:
     headers = [header.replace(f'#'*depth, '') for header in headers]
     # strip whitespaces
     headers = [header.strip() for header in headers]
+    # replace spaces with -
+    headers = [header.replace(' ', '-') for header in headers]
 
     return headers
 
