@@ -1,6 +1,12 @@
 # Md-table-of-contents-generator
 Table of contents generated from headers of a markdown file. 
 
+## Purpose
+
+This script will create a table of contents for a specified markdown file.
+A table of contents may be generated for headers defined using html tags as well as headers defined with markdown syntax.
+If the provided file already has a table of contents, the script will replace it with the new one.
+
 ## Installation
 
 It is advisable to use virtualenv to install the program.
@@ -22,5 +28,8 @@ Use the following command to generate the table of contents for a markdown file 
 
     python md-table-of-contents-generator.py --input=README.md --output=README.md.toc
 
-## License
+## Contributing
+It is an open source project, so feel free to contribute!
 
+## License
+This project is licensed under the <a href="https://github.com/djeada/Markdown-table-of-contents-generator/blob/master/LICENSE">MIT license</a>.
