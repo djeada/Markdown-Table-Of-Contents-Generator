@@ -1,6 +1,11 @@
-from src.main import is_using_html_tags, is_using_markdown_syntax, find_headers_html, find_headers_markdown
+from src.main import (
+    is_using_html_tags,
+    is_using_markdown_syntax,
+    find_headers_html,
+    find_headers_markdown,
+)
 
-html_file_contents = '''
+html_file_contents = """
 <h1>Title</h1>
 <p>This is a paragraph.</p>
 <h2>Subtitle</h2>
@@ -17,9 +22,9 @@ html_file_contents = '''
 <p>This is a paragraph.</p>
 <h2>Spanish</h2>
 <p>This is a paragraph.</p>
-'''
+"""
 
-markdown_file_contents = '''
+markdown_file_contents = """
 # Title
 This is a paragraph.
 ## Subtitle
@@ -36,7 +41,7 @@ This is a paragraph.
 This is a paragraph.
 ## Spanish
 This is a paragraph.
-'''
+"""
 
 
 def test_is_using_html_tags():
@@ -45,10 +50,11 @@ def test_is_using_html_tags():
 
 
 def test_find_headers_html():
-    depth_to_headers = {1: ['Title', 'Programs', 'Languages'],
-                        2: ['Python', 'Java', 'C++', 'English', 'Spanish', 'Subtitle'],
-                        3: list()
-                        }
+    depth_to_headers = {
+        1: ["Title", "Programs", "Languages"],
+        2: ["Python", "Java", "C++", "English", "Spanish", "Subtitle"],
+        3: list(),
+    }
 
     for depth, headers in depth_to_headers.items():
         expected = sorted(headers)
@@ -57,10 +63,11 @@ def test_find_headers_html():
 
 
 def test_find_headers_markdown():
-    depth_to_headers = {1: ['Title', 'Programs', 'Languages'],
-                        2: ['Python', 'Java', 'C++', 'English', 'Spanish', 'Subtitle'],
-                        3: list()
-                        }
+    depth_to_headers = {
+        1: ["Title", "Programs", "Languages"],
+        2: ["Python", "Java", "C++", "English", "Spanish", "Subtitle"],
+        3: list(),
+    }
 
     for depth, headers in depth_to_headers.items():
         expected = sorted(headers)
