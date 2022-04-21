@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 import argparse
 
 
@@ -89,7 +89,7 @@ def find_headers_markdown(file_contents: str, depth: int = 1) -> List[str]:
         line
         for line in file_contents.split("\n")
         if line.lstrip().startswith(f"#" * depth)
-        and not line.lstrip().startswith(f"#" * (depth + 1))
+           and not line.lstrip().startswith(f"#" * (depth + 1))
     ]
     # filter out '#'*depth from lines
     headers = [header.replace(f"#" * depth, "") for header in headers]
@@ -101,24 +101,74 @@ def find_headers_markdown(file_contents: str, depth: int = 1) -> List[str]:
     return headers
 
 
+def find_headers_markdown_hierarchical(file_contents: str, start_depth: int, max_depth: int = 5) -> List[
+    Tuple[int, str]]:
+    """
+    Find headers in file.
+    """
+    headers = list()
+
+    for line in file_contents.split("\n"):
+        for depth in range(start_depth, max_depth + 1):
+            if line.lstrip().startswith(f"#" * depth) and not line.lstrip().startswith(f"#" * (depth + 1)):
+                headers.append((depth, line))
+                break
+
+    # filter out '#'*depth from lines
+    headers = [(depth, header.replace(f"#" * depth, "")) for depth, header in headers]
+    # strip whitespaces
+    headers = [(depth, header.strip()) for depth, header in headers]
+    # replace spaces with -
+    headers = [(depth, header.replace(" ", "-")) for depth, header in headers]
+
+    return headers
+
+
+def find_headers_html_hierarchical(file_contents: str, start_depth: int, max_depth: int = 5) -> List[Tuple[int, str]]:
+    """
+    Find headers in file.
+    """
+    headers = list()
+
+    for line in file_contents.split("\n"):
+        for depth in range(start_depth, max_depth + 1):
+            if line.lstrip().startswith(f"<h{depth}>"):
+                headers.append((depth, line))
+                break
+
+    # filter out '#'*depth from lines
+    headers = [(depth, header.replace(f"<h{depth}>", "").replace(f"</h{depth}>", "")) for depth, header in headers]
+    # strip whitespaces
+    headers = [(depth, header.strip()) for depth, header in headers]
+    # replace spaces with -
+    headers = [(depth, header.replace(" ", "-")) for depth, header in headers]
+
+    return headers
+
+
 def generate_table_of_contents(
-    file_contents: str, table_of_contents_name: str, depth: int
+        file_contents: str, table_of_contents_name: str, start_depth: int, max_depth: int = 5
 ) -> str:
     """
     Generate table of contents for file.
     """
-    if is_using_html_tags(file_contents):
-        headers = find_headers_html(file_contents, depth)
+    if is_using_markdown_syntax(file_contents):
+        headers = find_headers_markdown_hierarchical(file_contents, start_depth, max_depth)
+    elif is_using_html_tags(file_contents):
+        headers = find_headers_html_hierarchical(file_contents, start_depth, max_depth)
+    else:
+        raise ValueError("File is not using markdown or html tags")
+        
+    headers_formatted = list()
 
-    elif is_using_markdown_syntax(file_contents):
-        headers = find_headers_markdown(file_contents, depth)
-
-    headers = [f'- [{header.replace("-", " ")}](#{header})' for header in headers]
+    for depth, header in headers:
+        formatted_string = f'{"  " * (depth - 1)}- [{header}](#{header})'
+        headers_formatted.append(formatted_string)
 
     table_of_contents: List[str] = [
-        f"## {table_of_contents_name}",
-        f"{Tags.TABLE_CONTENTS_START}\n",
-    ] + headers + [f"\n{Tags.TABLE_CONTENTS_END}"]
+                                       f"## {table_of_contents_name}",
+                                       f"{Tags.TABLE_CONTENTS_START}\n",
+                                   ] + headers_formatted + [f"\n{Tags.TABLE_CONTENTS_END}"]
 
     return "\n".join(table_of_contents)
 
@@ -128,8 +178,8 @@ def is_table_of_contents_present(file_contents: str) -> bool:
     Check if table of contents is present in file.
     """
     return (
-        Tags.TABLE_CONTENTS_START in file_contents
-        and Tags.TABLE_CONTENTS_END in file_contents
+            Tags.TABLE_CONTENTS_START in file_contents
+            and Tags.TABLE_CONTENTS_END in file_contents
     )
 
 
@@ -159,7 +209,7 @@ def remove_table_of_contents(file_contents: str) -> str:
 
     # check if there are empty lines after start
     while file_contents[start] == "\n":
-        file_contents = file_contents[:start] + file_contents[start + 1 :]
+        file_contents = file_contents[:start] + file_contents[start + 1:]
 
     return file_contents
 
