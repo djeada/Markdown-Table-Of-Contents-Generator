@@ -1,5 +1,5 @@
 # Md-table-of-contents-generator
-Table of contents generated from headers of a markdown file. 
+Generate a table of contents from the headers of your markdown file.
 
 ## Purpose
 
