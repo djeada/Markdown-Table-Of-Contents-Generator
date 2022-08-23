@@ -1,6 +1,8 @@
 # Md-table-of-contents-generator
 Generate a table of contents from the headers of your markdown file.
 
+![Capture](https://user-images.githubusercontent.com/37275728/186139168-bc2de9d0-5804-41f8-82f3-e13ed73c5cbb.PNG)
+
 ## Table of Contents
 <!--ts-->
 
