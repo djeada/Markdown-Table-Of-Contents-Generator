@@ -1,6 +1,18 @@
 # Md-table-of-contents-generator
 Generate a table of contents from the headers of your markdown file.
 
+## Table of Contents
+<!--ts-->
+
+- [Md-table-of-contents-generator](#Md-table-of-contents-generator)
+  - [Purpose](#Purpose)
+  - [Installation](#Installation)
+  - [Usage](#Usage)
+  - [Contributing](#Contributing)
+  - [License](#License)
+
+<!--te-->
+
 ## Purpose
 
 This script will create a table of contents for a specified markdown file.
